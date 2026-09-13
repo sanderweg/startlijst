@@ -26,6 +26,10 @@
     --status-no-soft: #f8dede;
     --status-pending: #8a8378;
     --status-pending-soft: #ece9e2;
+    --status-cannot: #9c6b0e;
+    --status-cannot-soft: #f2e6c9;
+    --status-paid: #2b6ca3;
+    --status-paid-soft: #dbe9f5;
     --shadow: 0 1px 2px rgba(28, 26, 23, 0.06), 0 8px 24px -12px rgba(28, 26, 23, 0.18);
     --focus-ring: 0 0 0 3px rgba(216, 86, 15, 0.35);
   }
@@ -46,6 +50,10 @@
       --status-no-soft: #3a2020;
       --status-pending: #b3a998;
       --status-pending-soft: #2c281f;
+      --status-cannot: #e0b23c;
+      --status-cannot-soft: #3a2f14;
+      --status-paid: #6ea8e0;
+      --status-paid-soft: #16283a;
       --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
       --focus-ring: 0 0 0 3px rgba(255, 138, 61, 0.4);
     }
@@ -66,6 +74,10 @@
     --status-no-soft: #3a2020;
     --status-pending: #b3a998;
     --status-pending-soft: #2c281f;
+    --status-cannot: #e0b23c;
+    --status-cannot-soft: #3a2f14;
+    --status-paid: #6ea8e0;
+    --status-paid-soft: #16283a;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
     --focus-ring: 0 0 0 3px rgba(255, 138, 61, 0.4);
   }
@@ -173,8 +185,8 @@
 
   .stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: 8px;
     margin-bottom: 24px;
   }
   .stat-tile {
@@ -196,7 +208,7 @@
     font-family: "Rajdhani", sans-serif;
     font-variant-numeric: tabular-nums;
     font-weight: 700;
-    font-size: 1.9rem;
+    font-size: 1.6rem;
     line-height: 1;
     color: var(--tile-color, var(--text));
   }
@@ -333,6 +345,27 @@
   .pill[data-status="yes"].is-active { background: var(--status-yes-soft); color: var(--status-yes); }
   .pill[data-status="no"].is-active { background: var(--status-no-soft); color: var(--status-no); }
   .pill[data-status="pending"].is-active { background: var(--status-pending-soft); color: var(--status-pending); }
+  .pill[data-status="cannot"].is-active { background: var(--status-cannot-soft); color: var(--status-cannot); }
+  .pill[data-status="paid"].is-active { background: var(--status-paid-soft); color: var(--status-paid); }
+
+  .status-select {
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 10px;
+    cursor: pointer;
+    background-color: var(--surface-2);
+    color: var(--text-muted);
+    flex: 0 0 auto;
+  }
+  .status-select:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .status-select[data-status="pending"] { background-color: var(--status-pending-soft); color: var(--status-pending); }
+  .status-select[data-status="yes"] { background-color: var(--status-yes-soft); color: var(--status-yes); }
+  .status-select[data-status="cannot"] { background-color: var(--status-cannot-soft); color: var(--status-cannot); }
+  .status-select[data-status="no"] { background-color: var(--status-no-soft); color: var(--status-no); }
+  .status-select[data-status="paid"] { background-color: var(--status-paid-soft); color: var(--status-paid); }
 
   .del-btn {
     border: 1px solid var(--border);
@@ -367,7 +400,6 @@
 
   @media (max-width: 640px) {
     form.add-form { grid-template-columns: 1fr; }
-    .stats { grid-template-columns: repeat(2, 1fr); }
     .row { flex-direction: column; align-items: stretch; }
     .pill-group { align-self: flex-start; }
     header.page { align-items: flex-start; }
@@ -454,15 +486,20 @@
   // ────────────────────────────────────────────────────────────────────────
 
   const STATUS_META = {
-    pending: { label: "Geen reactie", short: "Wacht" },
-    yes:     { label: "Ja",           short: "Ja" },
-    no:      { label: "Nee",          short: "Nee" },
+    pending: { label: "Geen reactie",  short: "Wacht" },
+    yes:     { label: "Ja",            short: "Ja" },
+    cannot:  { label: "Kan niet",      short: "Kan niet" },
+    no:      { label: "Nee",           short: "Nee" },
+    paid:    { label: "Heeft betaald", short: "Betaald" },
   };
+  const STATUS_ORDER = ["pending", "yes", "cannot", "no", "paid"];
   const FILTERS = [
-    { key: "all",     label: "Totaal",      color: null },
-    { key: "pending", label: "Wachten",     color: "var(--status-pending)" },
-    { key: "yes",     label: "Bevestigd",   color: "var(--status-yes)" },
-    { key: "no",      label: "Afgewezen",   color: "var(--status-no)" },
+    { key: "all",     label: "Totaal",    color: null },
+    { key: "pending", label: "Wachten",   color: "var(--status-pending)" },
+    { key: "yes",     label: "Bevestigd", color: "var(--status-yes)" },
+    { key: "cannot",  label: "Kan niet",  color: "var(--status-cannot)" },
+    { key: "no",      label: "Afgewezen", color: "var(--status-no)" },
+    { key: "paid",    label: "Betaald",   color: "var(--status-paid)" },
   ];
 
   let entries = [];
@@ -496,7 +533,7 @@
   }
 
   function counts() {
-    const c = { all: entries.length, pending: 0, yes: 0, no: 0 };
+    const c = { all: entries.length, pending: 0, yes: 0, cannot: 0, no: 0, paid: 0 };
     for (const e of entries) c[e.status] = (c[e.status] || 0) + 1;
     return c;
   }
@@ -537,18 +574,21 @@
       badge.appendChild(b);
       return badge;
     }
-    const group = document.createElement("div");
-    group.className = "pill-group";
-    for (const key of ["pending", "yes", "no"]) {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "pill" + (entry.status === key ? " is-active" : "");
-      b.dataset.status = key;
-      b.textContent = STATUS_META[key].short;
-      b.addEventListener("click", () => setStatus(entry.id, key));
-      group.appendChild(b);
+    const select = document.createElement("select");
+    select.className = "status-select";
+    select.dataset.status = entry.status;
+    for (const key of STATUS_ORDER) {
+      const opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = STATUS_META[key].short;
+      if (key === entry.status) opt.selected = true;
+      select.appendChild(opt);
     }
-    return group;
+    select.addEventListener("change", () => {
+      select.dataset.status = select.value;
+      setStatus(entry.id, select.value);
+    });
+    return select;
   }
 
   function renderRow(entry, isExample) {
@@ -628,7 +668,7 @@
       return;
     }
 
-    const statusRank = { pending: 0, yes: 1, no: 2 };
+    const statusRank = { pending: 0, yes: 1, cannot: 2, no: 3, paid: 4 };
     const shown = entries
       .filter(e => filter === "all" || e.status === filter)
       .sort((a, b) => {
