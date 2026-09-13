@@ -383,6 +383,38 @@
   .del-btn.confirm { background: var(--status-no-soft); color: var(--status-no); border-color: var(--status-no); font-size: 0.68rem; width: auto; padding: 0 10px; font-weight: 600; }
   .del-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
+  .group { margin-bottom: 22px; }
+  .group-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin: 0 2px 10px;
+  }
+  .group-title {
+    font-family: "Rajdhani", sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin: 0;
+    color: var(--text);
+  }
+  .group-counts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .gcount {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .gcount[data-status="pending"] { background: var(--status-pending-soft); color: var(--status-pending); }
+  .gcount[data-status="yes"] { background: var(--status-yes-soft); color: var(--status-yes); }
+  .gcount[data-status="cannot"] { background: var(--status-cannot-soft); color: var(--status-cannot); }
+  .gcount[data-status="no"] { background: var(--status-no-soft); color: var(--status-no); }
+  .gcount[data-status="paid"] { background: var(--status-paid-soft); color: var(--status-paid); }
+
   .empty-hint { font-size: 0.85rem; color: var(--text-muted); padding: 4px 2px 14px; }
 
   .config-warning {
@@ -604,12 +636,6 @@
     name.className = "row-name";
     name.textContent = entry.name;
     nameLine.appendChild(name);
-    if (entry.event) {
-      const ev = document.createElement("span");
-      ev.className = "row-event";
-      ev.textContent = entry.event;
-      nameLine.appendChild(ev);
-    }
     if (isExample) {
       const badge = document.createElement("span");
       badge.className = "example-badge";
@@ -653,14 +679,14 @@
     lockedNoteEl.hidden = unlocked;
 
     const activeLabel = FILTERS.find(f => f.key === filter);
-    listTitleEl.textContent = filter === "all" ? "Iedereen" : activeLabel.label;
+    listTitleEl.textContent = filter === "all" ? "Per race / event" : activeLabel.label;
 
     rowsEl.innerHTML = "";
     emptyHintEl.hidden = true;
 
     if (entries.length === 0) {
       const example = { id: "__example", name: "Mika van Dijk", event: "6H Alkmaar", note: "gevraagd op de club-avond", status: "pending" };
-      rowsEl.appendChild(renderRow(example, true));
+      rowsEl.appendChild(buildGroup("6H Alkmaar", [example], [example], true));
       emptyHintEl.hidden = false;
       emptyHintEl.textContent = unlocked
         ? "Nog niemand toegevoegd — hierboven staat een voorbeeld. Vul het formulier in om je eerste rijder toe te voegen."
@@ -669,22 +695,76 @@
     }
 
     const statusRank = { pending: 0, yes: 1, cannot: 2, no: 3, paid: 4 };
-    const shown = entries
-      .filter(e => filter === "all" || e.status === filter)
-      .sort((a, b) => {
-        if (filter === "all") {
-          const r = statusRank[a.status] - statusRank[b.status];
-          if (r !== 0) return r;
-        }
-        return a.name.localeCompare(b.name, "nl");
-      });
 
-    if (shown.length === 0) {
+    const groups = new Map();
+    for (const e of entries) {
+      const key = (e.event && e.event.trim()) || "";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(e);
+    }
+    const groupKeys = Array.from(groups.keys()).sort((a, b) => {
+      if (a === "") return 1;
+      if (b === "") return -1;
+      return a.localeCompare(b, "nl");
+    });
+
+    let anyShown = false;
+    for (const key of groupKeys) {
+      const groupEntries = groups.get(key);
+      const shown = groupEntries
+        .filter((e) => filter === "all" || e.status === filter)
+        .sort((a, b) => {
+          if (filter === "all") {
+            const r = statusRank[a.status] - statusRank[b.status];
+            if (r !== 0) return r;
+          }
+          return a.name.localeCompare(b.name, "nl");
+        });
+      if (shown.length === 0) continue;
+      anyShown = true;
+      rowsEl.appendChild(buildGroup(key, groupEntries, shown, false));
+    }
+
+    if (!anyShown) {
       emptyHintEl.hidden = false;
       emptyHintEl.textContent = "Niemand in deze categorie.";
-      return;
     }
-    for (const e of shown) rowsEl.appendChild(renderRow(e, false));
+  }
+
+  function buildGroup(key, groupEntries, shownEntries, isExample) {
+    const wrap = document.createElement("div");
+    wrap.className = "group";
+
+    const head = document.createElement("div");
+    head.className = "group-head";
+    const title = document.createElement("h3");
+    title.className = "group-title";
+    title.textContent = key || "Geen race gekoppeld";
+    head.appendChild(title);
+
+    if (!isExample) {
+      const countsWrap = document.createElement("div");
+      countsWrap.className = "group-counts";
+      const gc = { pending: 0, yes: 0, cannot: 0, no: 0, paid: 0 };
+      for (const e of groupEntries) gc[e.status] = (gc[e.status] || 0) + 1;
+      for (const statusKey of STATUS_ORDER) {
+        if (!gc[statusKey]) continue;
+        const chip = document.createElement("span");
+        chip.className = "gcount";
+        chip.dataset.status = statusKey;
+        chip.textContent = gc[statusKey] + " " + STATUS_META[statusKey].short;
+        countsWrap.appendChild(chip);
+      }
+      head.appendChild(countsWrap);
+    }
+    wrap.appendChild(head);
+
+    const rowsWrap = document.createElement("div");
+    rowsWrap.className = "rows";
+    for (const e of shownEntries) rowsWrap.appendChild(renderRow(e, isExample));
+    wrap.appendChild(rowsWrap);
+
+    return wrap;
   }
 
   async function addEntry(data) {
