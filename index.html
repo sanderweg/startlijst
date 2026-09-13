@@ -408,7 +408,8 @@
     </div>
     <div class="field">
       <label for="inEvent">Race / event</label>
-      <input id="inEvent" name="event" type="text" placeholder="bv. 24H Braga" autocomplete="off">
+      <input id="inEvent" name="event" type="text" placeholder="bv. 24H Braga" autocomplete="off" list="eventOptions">
+      <datalist id="eventOptions"></datalist>
     </div>
     <div class="field">
       <label for="inNote">Notitie</label>
@@ -436,14 +437,14 @@
   // Vervang deze placeholders met de config uit je eigen Firebase-project.
   // Zie README.md voor de stappen. Deze waarden zijn NIET geheim — de
   // beveiliging zit in de Firestore-regels + het wachtwoord, niet hierin.
-const firebaseConfig = {
-  apiKey: "AIzaSyBoVH5U5smbw1yMb0lyyM_Byywhc0zZMfg",
-  authDomain: "inschrijving-cc2fd.firebaseapp.com",
-  projectId: "inschrijving-cc2fd",
-  storageBucket: "inschrijving-cc2fd.firebasestorage.app",
-  messagingSenderId: "743684387377",
-  appId: "1:743684387377:web:31b348fda29b68a82b9b10"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyBoVH5U5smbw1yMb0lyyM_Byywhc0zZMfg",
+    authDomain: "inschrijving-cc2fd.firebaseapp.com",
+    projectId: "inschrijving-cc2fd",
+    storageBucket: "inschrijving-cc2fd.firebasestorage.app",
+    messagingSenderId: "743684387377",
+    appId: "1:743684387377:web:31b348fda29b68a82b9b10",
+  };
 
   // Vast e-mailadres achter het gedeelde wachtwoord (hoeft geen echte inbox
   // te zijn — het is alleen de inlog-identiteit voor Firebase Auth).
@@ -498,6 +499,17 @@ const firebaseConfig = {
     const c = { all: entries.length, pending: 0, yes: 0, no: 0 };
     for (const e of entries) c[e.status] = (c[e.status] || 0) + 1;
     return c;
+  }
+
+  function updateEventOptions() {
+    const dl = document.getElementById("eventOptions");
+    dl.innerHTML = "";
+    const unique = Array.from(new Set(entries.map((e) => e.event).filter(Boolean))).sort((a, b) => a.localeCompare(b, "nl"));
+    for (const v of unique) {
+      const opt = document.createElement("option");
+      opt.value = v;
+      dl.appendChild(opt);
+    }
   }
 
   function renderStats() {
@@ -596,6 +608,7 @@ const firebaseConfig = {
 
   function render() {
     renderStats();
+    updateEventOptions();
     addFormEl.hidden = !unlocked;
     lockedNoteEl.hidden = unlocked;
 
