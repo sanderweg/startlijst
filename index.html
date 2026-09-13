@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Startlijst</title>
+<meta name="description" content="Houd bij wie je hebt gevraagd om mee te racen, en of ze ja, nee, of nog geen antwoord hebben gegeven.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #f2f0ec;
+    --surface: #ffffff;
+    --surface-2: #ebe8e2;
+    --border: #ddd8cf;
+    --text: #1c1a17;
+    --text-muted: #777165;
+    --accent: #d8560f;
+    --accent-ink: #ffffff;
+    --status-yes: #2f8f4e;
+    --status-yes-soft: #dcf0e1;
+    --status-no: #c53434;
+    --status-no-soft: #f8dede;
+    --status-pending: #8a8378;
+    --status-pending-soft: #ece9e2;
+    --shadow: 0 1px 2px rgba(28, 26, 23, 0.06), 0 8px 24px -12px rgba(28, 26, 23, 0.18);
+    --focus-ring: 0 0 0 3px rgba(216, 86, 15, 0.35);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16140f;
+      --surface: #211e18;
+      --surface-2: #292520;
+      --border: #3a352c;
+      --text: #f1ede4;
+      --text-muted: #9a9284;
+      --accent: #ff8a3d;
+      --accent-ink: #1a1006;
+      --status-yes: #5cc27f;
+      --status-yes-soft: #1c3223;
+      --status-no: #ee6a6a;
+      --status-no-soft: #3a2020;
+      --status-pending: #b3a998;
+      --status-pending-soft: #2c281f;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+      --focus-ring: 0 0 0 3px rgba(255, 138, 61, 0.4);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #16140f;
+    --surface: #211e18;
+    --surface-2: #292520;
+    --border: #3a352c;
+    --text: #f1ede4;
+    --text-muted: #9a9284;
+    --accent: #ff8a3d;
+    --accent-ink: #1a1006;
+    --status-yes: #5cc27f;
+    --status-yes-soft: #1c3223;
+    --status-no: #ee6a6a;
+    --status-no-soft: #3a2020;
+    --status-pending: #b3a998;
+    --status-pending-soft: #2c281f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+    --focus-ring: 0 0 0 3px rgba(255, 138, 61, 0.4);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    padding: 32px 16px 64px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 780px; margin: 0 auto; }
+
+  header.page {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .title-block h1 {
+    font-family: "Rajdhani", "IBM Plex Sans", sans-serif;
+    font-weight: 700;
+    font-size: 2.5rem;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  .title-block .accent-bar {
+    display: inline-block;
+    width: 34px;
+    height: 4px;
+    background: var(--accent);
+    border-radius: 2px;
+    margin-bottom: 10px;
+  }
+  .title-block p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    max-width: 46ch;
+  }
+
+  .auth-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  .auth-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .auth-pill.unlocked { color: var(--status-yes); border-color: var(--status-yes); background: var(--status-yes-soft); }
+  .auth-pill:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+  .unlock-form {
+    display: none;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: var(--shadow);
+  }
+  .unlock-form.open { display: flex; }
+  .unlock-form input {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 9px;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.85rem;
+    width: 150px;
+  }
+  .unlock-form button {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 6px;
+    padding: 0 12px;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .auth-error { font-size: 0.74rem; color: var(--status-no); max-width: 220px; text-align: right; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .stat-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+    color: inherit;
+  }
+  .stat-tile:hover { transform: translateY(-1px); }
+  .stat-tile:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .stat-tile.active { border-color: var(--tile-color, var(--accent)); }
+  .stat-tile .num {
+    font-family: "Rajdhani", sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 1.9rem;
+    line-height: 1;
+    color: var(--tile-color, var(--text));
+  }
+  .stat-tile .lbl {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  form.add-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .field label {
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .field input {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 10px;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.92rem;
+    width: 100%;
+  }
+  .field input:focus-visible { outline: none; box-shadow: var(--focus-ring); border-color: var(--accent); }
+
+  button.primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: filter 0.15s ease;
+  }
+  button.primary:hover { filter: brightness(1.06); }
+  button.primary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+  .locked-note {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+  }
+
+  .list-head { display: flex; align-items: center; justify-content: space-between; margin: 0 2px 10px; }
+  .list-head h2 {
+    font-family: "Rajdhani", sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .rows { display: flex; flex-direction: column; gap: 8px; }
+
+  .row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .row.example { border-style: dashed; opacity: 0.72; }
+
+  .row-main { flex: 1 1 220px; min-width: 0; }
+  .row-name-line { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .row-name { font-weight: 600; font-size: 1rem; }
+  .example-badge {
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 2px 8px;
+  }
+  .row-event { font-size: 0.78rem; color: var(--accent); font-weight: 500; }
+  .row-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; overflow-wrap: anywhere; }
+
+  .pill-group {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px;
+    background: var(--surface-2);
+    gap: 2px;
+    flex: 0 0 auto;
+  }
+  .pill {
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .pill:disabled { cursor: default; }
+  .pill:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .pill[data-status="yes"].is-active { background: var(--status-yes-soft); color: var(--status-yes); }
+  .pill[data-status="no"].is-active { background: var(--status-no-soft); color: var(--status-no); }
+  .pill[data-status="pending"].is-active { background: var(--status-pending-soft); color: var(--status-pending); }
+
+  .del-btn {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1;
+    flex: 0 0 auto;
+  }
+  .del-btn:hover { color: var(--status-no); border-color: var(--status-no); }
+  .del-btn.confirm { background: var(--status-no-soft); color: var(--status-no); border-color: var(--status-no); font-size: 0.68rem; width: auto; padding: 0 10px; font-weight: 600; }
+  .del-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+  .empty-hint { font-size: 0.85rem; color: var(--text-muted); padding: 4px 2px 14px; }
+
+  .config-warning {
+    display: none;
+    background: var(--status-no-soft);
+    border: 1px solid var(--status-no);
+    color: var(--status-no);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+  }
+  .config-warning.show { display: block; }
+  .config-warning code { font-size: 0.8rem; }
+
+  @media (max-width: 640px) {
+    form.add-form { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .row { flex-direction: column; align-items: stretch; }
+    .pill-group { align-self: flex-start; }
+    header.page { align-items: flex-start; }
+    .auth-box { align-items: flex-start; }
+    .auth-error { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page">
+    <div class="title-block">
+      <span class="accent-bar"></span>
+      <h1>Startlijst</h1>
+      <p>Wie je hebt gevraagd om mee te racen, en waar dat staat: ja, nee, of nog geen reactie.</p>
+    </div>
+    <div class="auth-box">
+      <button class="auth-pill" id="authPill" type="button">🔒 Alleen-lezen · ontgrendelen</button>
+      <form class="unlock-form" id="unlockForm">
+        <input type="password" id="pwInput" placeholder="Wachtwoord" autocomplete="current-password">
+        <button type="submit">Ontgrendel</button>
+      </form>
+      <div class="auth-error" id="authError"></div>
+    </div>
+  </header>
+
+  <div class="config-warning" id="configWarning">
+    Firebase is nog niet ingesteld. Vul <code>firebaseConfig</code> bovenin het script van <code>index.html</code> in met de gegevens uit je Firebase-project (zie README.md).
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <form class="add-form" id="addForm" hidden>
+    <div class="field">
+      <label for="inName">Naam</label>
+      <input id="inName" name="name" type="text" placeholder="bv. Sander de Vries" autocomplete="off" required>
+    </div>
+    <div class="field">
+      <label for="inEvent">Race / event</label>
+      <input id="inEvent" name="event" type="text" placeholder="bv. 24H Braga" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="inNote">Notitie</label>
+      <input id="inNote" name="note" type="text" placeholder="bv. gevraagd via WhatsApp" autocomplete="off">
+    </div>
+    <button class="primary" type="submit">Toevoegen</button>
+  </form>
+  <div class="locked-note" id="lockedNote" hidden>Ontgrendel met het wachtwoord om iemand toe te voegen of statussen te wijzigen.</div>
+
+  <div class="list-head">
+    <h2 id="listTitle">Iedereen</h2>
+  </div>
+
+  <div class="rows" id="rows"></div>
+  <div class="empty-hint" id="emptyHint" hidden></div>
+</div>
+
+<!-- Firebase (compat SDK — simple <script> tags, no build step needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+<script>
+  // ── Firebase project config ────────────────────────────────────────────
+  // Vervang deze placeholders met de config uit je eigen Firebase-project.
+  // Zie README.md voor de stappen. Deze waarden zijn NIET geheim — de
+  // beveiliging zit in de Firestore-regels + het wachtwoord, niet hierin.
+const firebaseConfig = {
+  apiKey: "AIzaSyBoVH5U5smbw1yMb0lyyM_Byywhc0zZMfg",
+  authDomain: "inschrijving-cc2fd.firebaseapp.com",
+  projectId: "inschrijving-cc2fd",
+  storageBucket: "inschrijving-cc2fd.firebasestorage.app",
+  messagingSenderId: "743684387377",
+  appId: "1:743684387377:web:31b348fda29b68a82b9b10"
+};
+
+  // Vast e-mailadres achter het gedeelde wachtwoord (hoeft geen echte inbox
+  // te zijn — het is alleen de inlog-identiteit voor Firebase Auth).
+  // Maak in Firebase Authentication > Users precies één gebruiker aan met
+  // dit e-mailadres en het wachtwoord dat je wilt delen met je team.
+  const SHARED_LOGIN_EMAIL = "team@startlijst.app";
+  // ────────────────────────────────────────────────────────────────────────
+
+  const STATUS_META = {
+    pending: { label: "Geen reactie", short: "Wacht" },
+    yes:     { label: "Ja",           short: "Ja" },
+    no:      { label: "Nee",          short: "Nee" },
+  };
+  const FILTERS = [
+    { key: "all",     label: "Totaal",      color: null },
+    { key: "pending", label: "Wachten",     color: "var(--status-pending)" },
+    { key: "yes",     label: "Bevestigd",   color: "var(--status-yes)" },
+    { key: "no",      label: "Afgewezen",   color: "var(--status-no)" },
+  ];
+
+  let entries = [];
+  let filter = "all";
+  let unlocked = false;
+  let confirmDeleteId = null;
+  let col = null;
+
+  const rowsEl = document.getElementById("rows");
+  const statsEl = document.getElementById("stats");
+  const listTitleEl = document.getElementById("listTitle");
+  const emptyHintEl = document.getElementById("emptyHint");
+  const addFormEl = document.getElementById("addForm");
+  const lockedNoteEl = document.getElementById("lockedNote");
+  const authPillEl = document.getElementById("authPill");
+  const unlockFormEl = document.getElementById("unlockForm");
+  const authErrorEl = document.getElementById("authError");
+  const configWarningEl = document.getElementById("configWarning");
+
+  function relTime(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d)) return "";
+    const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+    if (days <= 0) return "vandaag";
+    if (days === 1) return "gisteren";
+    if (days < 14) return days + " dagen geleden";
+    const weeks = Math.floor(days / 7);
+    if (weeks < 8) return weeks + " weken geleden";
+    return d.toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
+  }
+
+  function counts() {
+    const c = { all: entries.length, pending: 0, yes: 0, no: 0 };
+    for (const e of entries) c[e.status] = (c[e.status] || 0) + 1;
+    return c;
+  }
+
+  function renderStats() {
+    const c = counts();
+    statsEl.innerHTML = "";
+    for (const f of FILTERS) {
+      const btn = document.createElement("button");
+      btn.className = "stat-tile" + (filter === f.key ? " active" : "");
+      btn.type = "button";
+      if (f.color) btn.style.setProperty("--tile-color", f.color);
+      btn.innerHTML = `<span class="num">${c[f.key] || 0}</span><span class="lbl">${f.label}</span>`;
+      btn.addEventListener("click", () => { filter = f.key; render(); });
+      statsEl.appendChild(btn);
+    }
+  }
+
+  function statusControl(entry) {
+    if (!unlocked) {
+      const badge = document.createElement("div");
+      badge.className = "pill-group";
+      const b = document.createElement("span");
+      b.className = "pill is-active";
+      b.dataset.status = entry.status;
+      b.textContent = STATUS_META[entry.status].short;
+      badge.appendChild(b);
+      return badge;
+    }
+    const group = document.createElement("div");
+    group.className = "pill-group";
+    for (const key of ["pending", "yes", "no"]) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "pill" + (entry.status === key ? " is-active" : "");
+      b.dataset.status = key;
+      b.textContent = STATUS_META[key].short;
+      b.addEventListener("click", () => setStatus(entry.id, key));
+      group.appendChild(b);
+    }
+    return group;
+  }
+
+  function renderRow(entry, isExample) {
+    const row = document.createElement("div");
+    row.className = "row" + (isExample ? " example" : "");
+
+    const main = document.createElement("div");
+    main.className = "row-main";
+
+    const nameLine = document.createElement("div");
+    nameLine.className = "row-name-line";
+    const name = document.createElement("span");
+    name.className = "row-name";
+    name.textContent = entry.name;
+    nameLine.appendChild(name);
+    if (entry.event) {
+      const ev = document.createElement("span");
+      ev.className = "row-event";
+      ev.textContent = entry.event;
+      nameLine.appendChild(ev);
+    }
+    if (isExample) {
+      const badge = document.createElement("span");
+      badge.className = "example-badge";
+      badge.textContent = "voorbeeld";
+      nameLine.appendChild(badge);
+    }
+    main.appendChild(nameLine);
+
+    const metaBits = [];
+    if (entry.note) metaBits.push(entry.note);
+    if (!isExample && entry.createdAt) metaBits.push("gevraagd " + relTime(entry.createdAt));
+    if (metaBits.length) {
+      const meta = document.createElement("div");
+      meta.className = "row-meta";
+      meta.textContent = metaBits.join(" · ");
+      main.appendChild(meta);
+    }
+    row.appendChild(main);
+    row.appendChild(statusControl(entry));
+
+    if (!isExample && unlocked) {
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "del-btn" + (confirmDeleteId === entry.id ? " confirm" : "");
+      del.textContent = confirmDeleteId === entry.id ? "Verwijderen?" : "✕";
+      del.title = "Verwijderen";
+      del.addEventListener("click", () => {
+        if (confirmDeleteId === entry.id) removeEntry(entry.id);
+        else { confirmDeleteId = entry.id; render(); }
+      });
+      row.appendChild(del);
+    }
+
+    return row;
+  }
+
+  function render() {
+    renderStats();
+    addFormEl.hidden = !unlocked;
+    lockedNoteEl.hidden = unlocked;
+
+    const activeLabel = FILTERS.find(f => f.key === filter);
+    listTitleEl.textContent = filter === "all" ? "Iedereen" : activeLabel.label;
+
+    rowsEl.innerHTML = "";
+    emptyHintEl.hidden = true;
+
+    if (entries.length === 0) {
+      const example = { id: "__example", name: "Mika van Dijk", event: "6H Alkmaar", note: "gevraagd op de club-avond", status: "pending" };
+      rowsEl.appendChild(renderRow(example, true));
+      emptyHintEl.hidden = false;
+      emptyHintEl.textContent = unlocked
+        ? "Nog niemand toegevoegd — hierboven staat een voorbeeld. Vul het formulier in om je eerste rijder toe te voegen."
+        : "Nog niemand toegevoegd — hierboven staat een voorbeeld.";
+      return;
+    }
+
+    const statusRank = { pending: 0, yes: 1, no: 2 };
+    const shown = entries
+      .filter(e => filter === "all" || e.status === filter)
+      .sort((a, b) => {
+        if (filter === "all") {
+          const r = statusRank[a.status] - statusRank[b.status];
+          if (r !== 0) return r;
+        }
+        return a.name.localeCompare(b.name, "nl");
+      });
+
+    if (shown.length === 0) {
+      emptyHintEl.hidden = false;
+      emptyHintEl.textContent = "Niemand in deze categorie.";
+      return;
+    }
+    for (const e of shown) rowsEl.appendChild(renderRow(e, false));
+  }
+
+  async function addEntry(data) {
+    if (!col) return;
+    const now = new Date().toISOString();
+    try {
+      await col.add({
+        name: data.name,
+        event: data.event || "",
+        note: data.note || "",
+        status: "pending",
+        createdAt: now,
+        updatedAt: now,
+      });
+    } catch (e) { console.error("addEntry failed", e); }
+  }
+
+  async function setStatus(id, status) {
+    if (!col) return;
+    try {
+      await col.doc(id).update({ status, updatedAt: new Date().toISOString() });
+    } catch (e) { console.error("setStatus failed", e); }
+  }
+
+  async function removeEntry(id) {
+    if (!col) return;
+    try {
+      await col.doc(id).delete();
+    } catch (e) { console.error("removeEntry failed", e); }
+    finally { confirmDeleteId = null; }
+  }
+
+  document.getElementById("addForm").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const form = ev.target;
+    const name = form.name.value.trim();
+    if (!name) return;
+    addEntry({ name, event: form.event.value.trim(), note: form.note.value.trim() });
+    form.reset();
+    form.name.focus();
+  });
+
+  document.addEventListener("click", (ev) => {
+    if (confirmDeleteId && !ev.target.closest(".del-btn")) {
+      confirmDeleteId = null;
+      render();
+    }
+  });
+
+  // ── Auth (gedeeld wachtwoord) ───────────────────────────────────────────
+  authPillEl.addEventListener("click", () => {
+    if (unlocked) {
+      firebase.auth().signOut();
+      return;
+    }
+    unlockFormEl.classList.toggle("open");
+    if (unlockFormEl.classList.contains("open")) document.getElementById("pwInput").focus();
+  });
+
+  unlockFormEl.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    authErrorEl.textContent = "";
+    const pw = document.getElementById("pwInput").value;
+    if (!pw) return;
+    try {
+      await firebase.auth().signInWithEmailAndPassword(SHARED_LOGIN_EMAIL, pw);
+      document.getElementById("pwInput").value = "";
+      unlockFormEl.classList.remove("open");
+    } catch (e) {
+      authErrorEl.textContent = "Wachtwoord onjuist.";
+    }
+  });
+
+  function setUnlocked(state) {
+    unlocked = state;
+    authPillEl.textContent = unlocked ? "🔓 Bewerken aan · vergrendelen" : "🔒 Alleen-lezen · ontgrendelen";
+    authPillEl.classList.toggle("unlocked", unlocked);
+    if (unlocked) unlockFormEl.classList.remove("open");
+    render();
+  }
+
+  // ── Boot ─────────────────────────────────────────────────────────────────
+  function boot() {
+    if (!firebaseConfig.apiKey || firebaseConfig.apiKey.startsWith("VUL_HIER")) {
+      configWarningEl.classList.add("show");
+      render();
+      return;
+    }
+    firebase.initializeApp(firebaseConfig);
+    firebase.auth().onAuthStateChanged((user) => setUnlocked(!!user));
+
+    col = firebase.firestore().collection("invites");
+    col.onSnapshot(
+      (snap) => {
+        entries = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        render();
+      },
+      (err) => { console.error("onSnapshot error", err); }
+    );
+    render();
+  }
+
+  boot();
+</script>
+</body>
+</html>

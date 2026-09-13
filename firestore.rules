@@ -1,0 +1,13 @@
+rules_version = '2';
+
+// Iedereen mag de startlijst lezen (open link = zichtbaar voor iedereen).
+// Alleen wie is ingelogd met het gedeelde wachtwoord (via Firebase
+// Authentication) mag toevoegen, wijzigen of verwijderen.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /invites/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
