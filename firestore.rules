@@ -1,13 +1,21 @@
 rules_version = '2';
 
-// Iedereen mag de startlijst lezen (open link = zichtbaar voor iedereen).
-// Alleen wie is ingelogd met het gedeelde wachtwoord (via Firebase
-// Authentication) mag toevoegen, wijzigen of verwijderen.
+// Eén Firebase-project voor zowel startlijst.teamendurance.nl als
+// management.teamendurance.nl — dit bestand vervangt de volledige regels
+// in de Firebase Console (Firestore > Rules) en geldt dus voor beide sites.
+//
+// Alles staat achter het gedeelde wachtwoord: zowel lezen als schrijven
+// vereist inloggen via Firebase Authentication.
 service cloud.firestore {
   match /databases/{database}/documents {
     match /invites/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read, write: if request.auth != null;
+    }
+    match /finance/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    match /training/{docId} {
+      allow read, write: if request.auth != null;
     }
   }
 }

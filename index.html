@@ -463,32 +463,35 @@
     Firebase is nog niet ingesteld. Vul <code>firebaseConfig</code> bovenin het script van <code>index.html</code> in met de gegevens uit je Firebase-project (zie README.md).
   </div>
 
-  <div class="stats" id="stats"></div>
+  <div class="locked-note" id="startlijstLocked">Ontgrendel met het wachtwoord om de startlijst te bekijken en te bewerken.</div>
 
-  <form class="add-form" id="addForm" hidden>
-    <div class="field">
-      <label for="inName">Naam</label>
-      <input id="inName" name="name" type="text" placeholder="bv. Sander de Vries" autocomplete="off" required>
-    </div>
-    <div class="field">
-      <label for="inEvent">Race / event</label>
-      <input id="inEvent" name="event" type="text" placeholder="bv. 24H Braga" autocomplete="off" list="eventOptions">
-      <datalist id="eventOptions"></datalist>
-    </div>
-    <div class="field">
-      <label for="inNote">Notitie</label>
-      <input id="inNote" name="note" type="text" placeholder="bv. gevraagd via WhatsApp" autocomplete="off">
-    </div>
-    <button class="primary" type="submit">Toevoegen</button>
-  </form>
-  <div class="locked-note" id="lockedNote" hidden>Ontgrendel met het wachtwoord om iemand toe te voegen of statussen te wijzigen.</div>
+  <div id="startlijstSection" hidden>
+    <div class="stats" id="stats"></div>
 
-  <div class="list-head">
-    <h2 id="listTitle">Iedereen</h2>
+    <form class="add-form" id="addForm">
+      <div class="field">
+        <label for="inName">Naam</label>
+        <input id="inName" name="name" type="text" placeholder="bv. Sander de Vries" autocomplete="off" required>
+      </div>
+      <div class="field">
+        <label for="inEvent">Race / event</label>
+        <input id="inEvent" name="event" type="text" placeholder="bv. 24H Braga" autocomplete="off" list="eventOptions">
+        <datalist id="eventOptions"></datalist>
+      </div>
+      <div class="field">
+        <label for="inNote">Notitie</label>
+        <input id="inNote" name="note" type="text" placeholder="bv. gevraagd via WhatsApp" autocomplete="off">
+      </div>
+      <button class="primary" type="submit">Toevoegen</button>
+    </form>
+
+    <div class="list-head">
+      <h2 id="listTitle">Iedereen</h2>
+    </div>
+
+    <div class="rows" id="rows"></div>
+    <div class="empty-hint" id="emptyHint" hidden></div>
   </div>
-
-  <div class="rows" id="rows"></div>
-  <div class="empty-hint" id="emptyHint" hidden></div>
 </div>
 
 <!-- Firebase (compat SDK — simple <script> tags, no build step needed) -->
@@ -539,13 +542,14 @@
   let unlocked = false;
   let confirmDeleteId = null;
   let col = null;
+  let colUnsub = null;
 
   const rowsEl = document.getElementById("rows");
   const statsEl = document.getElementById("stats");
   const listTitleEl = document.getElementById("listTitle");
   const emptyHintEl = document.getElementById("emptyHint");
-  const addFormEl = document.getElementById("addForm");
-  const lockedNoteEl = document.getElementById("lockedNote");
+  const startlijstLockedEl = document.getElementById("startlijstLocked");
+  const startlijstSectionEl = document.getElementById("startlijstSection");
   const authPillEl = document.getElementById("authPill");
   const unlockFormEl = document.getElementById("unlockForm");
   const authErrorEl = document.getElementById("authError");
@@ -675,8 +679,6 @@
   function render() {
     renderStats();
     updateEventOptions();
-    addFormEl.hidden = !unlocked;
-    lockedNoteEl.hidden = unlocked;
 
     const activeLabel = FILTERS.find(f => f.key === filter);
     listTitleEl.textContent = filter === "all" ? "Per race / event" : activeLabel.label;
@@ -838,11 +840,34 @@
     }
   });
 
+  function subscribeInvites() {
+    if (colUnsub || !col) return;
+    colUnsub = col.onSnapshot(
+      (snap) => {
+        entries = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        render();
+      },
+      (err) => { console.error("onSnapshot error", err); }
+    );
+  }
+  function unsubscribeInvites() {
+    if (colUnsub) { colUnsub(); colUnsub = null; }
+    entries = [];
+    render();
+  }
+
   function setUnlocked(state) {
     unlocked = state;
     authPillEl.textContent = unlocked ? "🔓 Bewerken aan · vergrendelen" : "🔒 Alleen-lezen · ontgrendelen";
     authPillEl.classList.toggle("unlocked", unlocked);
-    if (unlocked) unlockFormEl.classList.remove("open");
+    startlijstSectionEl.hidden = !unlocked;
+    startlijstLockedEl.hidden = unlocked;
+    if (unlocked) {
+      unlockFormEl.classList.remove("open");
+      subscribeInvites();
+    } else {
+      unsubscribeInvites();
+    }
     render();
   }
 
@@ -857,13 +882,6 @@
     firebase.auth().onAuthStateChanged((user) => setUnlocked(!!user));
 
     col = firebase.firestore().collection("invites");
-    col.onSnapshot(
-      (snap) => {
-        entries = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        render();
-      },
-      (err) => { console.error("onSnapshot error", err); }
-    );
     render();
   }
 
